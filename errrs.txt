@@ -1,0 +1,22 @@
+1. 2xx: Success
+200 OK: The request was successful.
+Use when: Everything works as expected (e.g., user creation, data retrieval).
+
+201 Created: A resource was successfully created.
+Use when: A new resource is created (e.g., user signup).
+___________________________________________________
+
+2. 4xx: Client Errors
+400 Bad Request: The request was malformed or invalid.
+Use when: The client sends invalid data (e.g., missing fields, incorrect format).
+
+401 Unauthorized: The user is not authenticated.
+Use when: The user needs to log in or provide valid credentials.
+
+409 Conflict: The request cannot be completed due to a conflict (e.g., duplicate data).
+Use when: Trying to create a resource that already exists (e.g., phone number already registered).
+___________________________________________________
+
+3. 5xx: Server Errors
+500 Internal Server Error: A generic error indicating a server-side issue.
+Use when: Something went wrong on the server (e.g., database failure).
