@@ -1,7 +1,10 @@
+import express from "express";
 import Product from "../models/product.js";
 
 import multer from "multer";
 import { v4 as uuid } from "uuid";
+
+import fs from "fs";
 
 const multerStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -19,16 +22,25 @@ const upload = multer({
 const getAllProducts = async (req, res) => {
   try {
     const fetchedProducts = await Product.find();
-    const response = {
-      count: fetchedProducts.length,
-      products: fetchedProducts.map((product) => {
-        return {
-          ...product._doc,
-        };
-      }),
-    };
+    //   .select(
+    //   "_id name description price discountPrice imageUrl category note "
+    // );
+    const response = fetchedProducts.reduce(
+      (result, product) => {
+        // const image = fs.readFileSync(product.imageUrl);
+
+        if (product.category === "studentBooks") {
+          result.studentBooks.push({ ...product._doc });
+        } else if (product.category === "booksAndNovel") {
+          result.booksAndNovel.push({ ...product._doc });
+        }
+        return result;
+      },
+      { studentBooks: [], booksAndNovel: [] }
+    );
+
     res.status(200).json({
-      response,
+      ...response,
     });
   } catch (err) {
     res.status(400).json({ error: err });
@@ -41,8 +53,7 @@ const getProductById = async (req, res) => {
     const product = await Product.findById(productId);
     if (product) {
       res.status(200).json({
-        message: "Product Detail",
-        product: product,
+        ...product._doc,
       });
     } else {
       res.status(200).json({ message: "not found" });
@@ -54,14 +65,13 @@ const getProductById = async (req, res) => {
 
 const addProduct = async (req, res) => {
   try {
-    const product = new Product(req.body);
+    const product = new Product({ ...req.body, imageUrl: req.file?.path });
     const newProduct = await product.save();
     if (newProduct) {
       res.status(200).json({
         message: "Product added successfully",
         product: {
-          ...newProduct._doc,
-          productImage: req.file ? req.file.path : null,
+          newProduct,
         },
       });
     }

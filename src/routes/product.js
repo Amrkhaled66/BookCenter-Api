@@ -14,6 +14,7 @@ import {
 router.get("/", getAllProducts);
 
 router.post("/", upload.single("imageUrl"), addProduct);
+
 // , checkAuth
 router.patch("/:productId", updateProduct);
 

@@ -11,6 +11,14 @@ const userSchema = new mongoose.Schema({
     unique: true,
     match: /^01[0125][0-9]{8}$/,
   },
+  secondaryPhone: {
+    type: String,
+    match: /^01[0125][0-9]{8}$/,
+  },
+
+  birthdate: {
+    type: Date,
+  },
   password: {
     type: String,
     required: true,

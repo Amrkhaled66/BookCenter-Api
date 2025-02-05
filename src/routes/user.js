@@ -4,11 +4,12 @@ import rateLimit from "express-rate-limit";
 import {
   signUpController,
   loginController,
-  getProfileController
-} from "../controllers/userController";
+  getProfileController,
+  refresh,
+  logout
+} from "../controllers/userController.js";
 
-import checkAuth from "../middleware/check-auth.js";
-
+import checkAuth from "../middleware/checkAuth.js";
 // middleware
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -18,10 +19,14 @@ const loginLimiter = rateLimit({
 
 const router = Router();
 
-// Authentication
+// // Authentication
 router.post("/signup", signUpController);
-router.post("/login", loginLimiter, loginController);
+router.post("/login", loginController);
+router.get("/refreshToken", refresh);
+router.get("/logout", logout);
 
 // profile
-router.get("/profile", checkAuth, getProfileController);
-router.patch("/profile", checkAuth, );
+router.get("/profile", checkAuth,getProfileController);
+// // router.patch("/profile", checkAuth, );
+
+export default router;
