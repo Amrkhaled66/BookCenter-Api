@@ -2,7 +2,7 @@ import Product from "../models/product.js";
 
 const addToCart = async (req, res) => {
   const { id, quantity } = req.body;
-  console.log(req.body);
+  req.body;
   // Validate input data
   if (!id || typeof quantity !== "number" || quantity <= 0) {
     return res.status(400).json({ message: "Invalid Data" });

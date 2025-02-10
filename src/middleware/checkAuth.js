@@ -11,7 +11,6 @@ const checkAuth = (req, res, next) => {
 
     let decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    console.log(decodedToken);
     if (!decodedToken) {
       return res
         .status(401)

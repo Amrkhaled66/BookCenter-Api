@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { getOrdersController } from "../controllers/userController.js";
 import checkAuth from "../middleware/checkAuth.js";
+
+import { addOrderController } from "../controllers/ordersController.js";
 
 const router = Router();
 
-router.get("/orders", checkAuth, getOrdersController);
+router.post("/add", checkAuth ,addOrderController);
 
 export default router;

@@ -13,8 +13,11 @@ import {
 } from "./src/middleware/errorMiddleware.js";
 // Routes
 import productsRoutes from "./src/routes/product.js";
-import userRoutes from "./src/routes/user.js";
+import authRoutes from "./src/routes/auth.js";
 import cartRoutes from "./src/routes/cart.js";
+import userRoutes from "./src/routes/user.js";
+import orderRoutes from "./src/routes/order.js";
+
 // Initialize the Express app
 
 const app = express();
@@ -37,9 +40,10 @@ app.use("/images", express.static("./images"));
 
 // API routes
 app.use("/products", productsRoutes);
-app.use("/user", userRoutes);
+app.use("/auth", authRoutes);
 app.use("/cart", cartRoutes);
-// app.use("/orders", orderRoutes);
+app.use("/user", userRoutes);
+app.use("/order", orderRoutes);
 
 // 404 Not Found handler
 app.use(notFoundHandler);
