@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import Order from "../models/Order.js";
 
+import City from "../models/City.js";
+
 const getProfileController = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password -id");
@@ -15,17 +17,53 @@ const getProfileController = async (req, res) => {
   }
 };
 
-const updateProfileController = async (req, res) => {
+const updateUserController = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.userId).select("-password");
+    const { id: userId } = req.user;
+    const { cityId, state, descriptiveAddress, secondaryPhone } = req.body;
 
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(user);
-  } catch (err) {
-    res.status(400).json({ message: err.message || "An error occurred" });
+    if (
+      secondaryPhone &&
+      !/^01[0125][0-9]{8}$/.test(secondaryPhone) &&
+      secondaryPhone == user.phone
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Invalid secondary phone number" });
+    }
+
+    const city = await City.findById(cityId);
+    if (!city) {
+      return res.status(404).json({ message: "City not found" });
+    }
+
+    if (!city.states.includes(state)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid state for the selected city" });
+    }
+
+    user.address = {
+      city: cityId,
+      state,
+      descriptiveAddress,
+    };
+    if (secondaryPhone) {
+      user.secondaryPhone = secondaryPhone;
+    }
+
+    await user.save();
+
+    res.status(200).json({ message: "Address updated successfully", user });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 
@@ -52,4 +90,4 @@ const getOrdersController = async (req, res) => {
   }
 };
 
-export { getProfileController, updateProfileController, getOrdersController };
+export { getProfileController, updateUserController, getOrdersController };

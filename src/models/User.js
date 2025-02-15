@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   address: {
-    city: { type: String },
+    city: { type: mongoose.Schema.Types.ObjectId, ref: "City"},
     state: { type: String },
     descriptiveAddress: { type: String },
   },

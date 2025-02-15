@@ -17,6 +17,7 @@ import authRoutes from "./src/routes/auth.js";
 import cartRoutes from "./src/routes/cart.js";
 import userRoutes from "./src/routes/user.js";
 import orderRoutes from "./src/routes/order.js";
+import cityRoutes from "./src/routes/city.js";
 
 // Initialize the Express app
 
@@ -44,6 +45,7 @@ app.use("/auth", authRoutes);
 app.use("/cart", cartRoutes);
 app.use("/user", userRoutes);
 app.use("/order", orderRoutes);
+app.use("/city", cityRoutes);
 
 // 404 Not Found handler
 app.use(notFoundHandler);

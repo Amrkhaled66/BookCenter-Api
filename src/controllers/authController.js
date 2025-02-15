@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import argon2 from "argon2";
 
 import jwt from "jsonwebtoken";
+import City from "../models/City.js";
 
 const CookiesOptions = {
   httpOnly: true, //accessible only by web server
@@ -84,13 +85,19 @@ const loginController = async (req, res) => {
 
     res.cookie("jwt", refreshToken, CookiesOptions);
 
+    const city = await City.findById(foundUser.address.city).select("name");
+
     res.json({
       accessToken,
       user: {
         name: foundUser.name,
         phone: foundUser.phone,
         birthdate: foundUser.birthdate,
-        address: foundUser.address,
+        address: {
+          city: city.name,
+          state: foundUser.address.state,
+          descriptiveAddress: foundUser.address.descriptiveAddress,
+        },
         secondaryPhone: foundUser.secondaryPhone,
       },
     });
