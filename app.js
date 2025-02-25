@@ -27,16 +27,10 @@ const app = express();
 // Middleware setup
 // app.use(helmet());
 app.use(
-  cors(
-    {
-      origin: "http://localhost:5173", // Your frontend URL
-      credentials: true,
-    },
-    {
-      origin: "https://book-center.netlify.app",
-      credentials: true,
-    }
-  )
+  cors({
+    origin: "https://book-center.netlify.app",
+    credentials: true,
+  })
 );
 
 app.use(morgan("dev"));
