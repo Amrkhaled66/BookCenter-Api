@@ -1,22 +1,43 @@
 import Product from "../../models/Product.js";
-const getOrderCart = (cart) => {
-  return cart.map(async ({ productInfo: { id }, quantity }) => {
-    const product = await Product.findById(id);
-    return {
-      name: product.name,
-      price: product.price,
-      quantity,
-    };
-  });
+
+// Function to get order cart with valid async handling
+const getOrderCart = async (cart) => {
+  try {
+    const cartItems = await Promise.all(
+      cart.map(async ({ productInfo: { id }, quantity }) => {
+        const product = await Product.findById(id);
+        if (!product) throw new Error(`Product with ID ${id} not found`);
+        return {
+          name: product.name,
+          price: product.price,
+          quantity,
+        };
+      })
+    );
+    return cartItems;
+  } catch (error) {
+    console.error("Error fetching order cart:", error);
+    throw error;
+  }
 };
 
-const getOrderTotal = (cart) => {
-  return cart.reduce((total, item) => {
-    const product = Product.findById(item.productInfo.id);
-    return total + product.price * item.quantity;
-  }, 0);
+// Function to correctly calculate order total
+const getOrderTotal = async (cart) => {
+  try {
+    let total = 0;
+    for (const item of cart) {
+      const product = await Product.findById(item.productInfo.id);
+      if (!product) throw new Error(`Product with ID ${item.productInfo.id} not found`);
+      total += product.price * item.quantity;
+    }
+    return total;
+  } catch (error) {
+    console.error("Error calculating order total:", error);
+    throw error;
+  }
 };
 
+// Shipping price function remains unchanged
 const getShippingPrice = (city) => {
   city = city.toLowerCase();
   if (city === "cairo" || city === "giza") {
@@ -24,4 +45,5 @@ const getShippingPrice = (city) => {
   }
   return 60;
 };
+
 export { getOrderCart, getOrderTotal, getShippingPrice };

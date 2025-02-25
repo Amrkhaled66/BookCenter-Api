@@ -116,32 +116,49 @@ const loginController = async (req, res) => {
 };
 
 const refresh = async (req, res) => {
-  const cookies = req.cookies;
+  try {
+    const cookies = req.cookies;
 
-  if (!cookies?.jwt) return res.status(401).json({ message: "Unauthorized" });
-
-  const refreshToken = cookies.jwt;
-
-  jwt.verify(
-    refreshToken,
-    process.env.REFRESH_TOKEN_SECRET,
-    async (err, decoded) => {
-      if (err) return res.status(403).json({ message: "Forbidden" });
-
-      const foundUser = await User.findOne({ _id: decoded.id }).exec();
-
-      if (!foundUser) return res.status(401).json({ message: "Unauthorized" });
-
-      const accessToken = generateTokensAndSetCookie(foundUser, res);
-      const userResponse = await formatUserResponse(foundUser);
-
-      res.status(200).json({
-        accessToken,
-        user: userResponse,
-      });
+    if (!cookies?.jwt) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
-  );
+
+    const refreshToken = cookies.jwt;
+
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+      async (err, decoded) => {
+        if (err) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+
+        try {
+          const foundUser = await User.findOne({ _id: decoded.id }).exec();
+
+          if (!foundUser) {
+            return res.status(401).json({ message: "Unauthorized" });
+          }
+
+          const accessToken = generateTokensAndSetCookie(foundUser, res);
+          const userResponse = await formatUserResponse(foundUser);
+
+          res.status(200).json({
+            accessToken,
+            user: userResponse,
+          });
+        } catch (error) {
+          console.error("Error in refresh function:", error);
+          res.status(500).json({ message: "Internal Server Error" });
+        }
+      }
+    );
+  } catch (error) {
+    console.error("Error in refresh function:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
+
 
 const logout = (req, res) => {
   try {
