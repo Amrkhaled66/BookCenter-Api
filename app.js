@@ -18,9 +18,9 @@ import cartRoutes from "./src/routes/cart.js";
 import userRoutes from "./src/routes/user.js";
 import orderRoutes from "./src/routes/order.js";
 import cityRoutes from "./src/routes/city.js";
+import invoiceRoutes from "./src/routes/invoice.js";
 
-// Initialize the Express app
-
+import getShippingCost from "./src/controllers/shippingController.js";
 const app = express();
 // app.use(mongoSanitize());
 
@@ -46,6 +46,8 @@ app.use("/cart", cartRoutes);
 app.use("/user", userRoutes);
 app.use("/order", orderRoutes);
 app.use("/city", cityRoutes);
+app.use("/invoice", invoiceRoutes);
+app.get("/shipping", getShippingCost);
 
 // 404 Not Found handler
 app.use(notFoundHandler);

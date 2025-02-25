@@ -3,8 +3,8 @@ import User from "../models/User.js";
 import argon2 from "argon2";
 
 import jwt from "jsonwebtoken";
-import City from "../models/City.js";
 
+import formatUserResponse from "../utils/formatUserResponse.js";
 const CookiesOptions = {
   httpOnly: true, //accessible only by web server
   secure: true, //https
@@ -32,6 +32,14 @@ const generateRefreshToken = (user) => {
   );
 };
 
+// Reusable function to generate tokens and set cookies
+const generateTokensAndSetCookie = (user, res) => {
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+  res.cookie("jwt", refreshToken, CookiesOptions);
+  return accessToken;
+};
+
 const signUpController = async (req, res) => {
   try {
     const checkExist = await User.findOne({ phone: req.body.phone });
@@ -47,8 +55,19 @@ const signUpController = async (req, res) => {
       password: hash,
     });
     await user.save();
+
+    const accessToken = generateTokensAndSetCookie(user, res);
+    const userResponse = {
+      name: user?.name,
+      phone: user?.phone,
+    };
+
     res.status(200).json({
-      message: "user created",
+      message: "User created",
+      response: {
+        accessToken,
+        user: userResponse,
+      },
     });
   } catch (err) {
     res.status(400).json({
@@ -58,10 +77,10 @@ const signUpController = async (req, res) => {
   }
 };
 
+// Reusable function to format user response
+
 const loginController = async (req, res) => {
   try {
-    req.body;
-
     const { phone, pass: password } = req.body;
 
     if (!phone || !password) {
@@ -80,26 +99,13 @@ const loginController = async (req, res) => {
         message: "error in phone or password",
       });
     }
-    const accessToken = generateAccessToken(foundUser);
-    const refreshToken = generateRefreshToken(foundUser);
 
-    res.cookie("jwt", refreshToken, CookiesOptions);
-
-    const city = await City.findById(foundUser.address.city).select("name");
+    const accessToken = generateTokensAndSetCookie(foundUser, res);
+    const userResponse = await formatUserResponse(foundUser);
 
     res.json({
       accessToken,
-      user: {
-        name: foundUser.name,
-        phone: foundUser.phone,
-        birthdate: foundUser.birthdate,
-        address: {
-          city: city.name,
-          state: foundUser.address.state,
-          descriptiveAddress: foundUser.address.descriptiveAddress,
-        },
-        secondaryPhone: foundUser.secondaryPhone,
-      },
+      user: userResponse,
     });
   } catch (err) {
     res.status(400).json({
@@ -109,7 +115,7 @@ const loginController = async (req, res) => {
   }
 };
 
-const refresh = (req, res) => {
+const refresh = async (req, res) => {
   const cookies = req.cookies;
 
   if (!cookies?.jwt) return res.status(401).json({ message: "Unauthorized" });
@@ -126,17 +132,12 @@ const refresh = (req, res) => {
 
       if (!foundUser) return res.status(401).json({ message: "Unauthorized" });
 
-      const accessToken = generateAccessToken(foundUser);
+      const accessToken = generateTokensAndSetCookie(foundUser, res);
+      const userResponse = await formatUserResponse(foundUser);
 
       res.status(200).json({
         accessToken,
-        user: {
-          name: foundUser.name,
-          phone: foundUser.phone,
-          birthdate: foundUser.birthdate,
-          address: foundUser.address,
-          secondaryPhone: foundUser.secondaryPhone,
-        },
+        user: userResponse,
       });
     }
   );

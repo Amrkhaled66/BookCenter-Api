@@ -1,7 +1,9 @@
+// models
 import User from "../models/User.js";
 import Order from "../models/Order.js";
-
 import City from "../models/City.js";
+
+import formatUserResponse from "../utils/formatUserResponse.js";
 
 const getProfileController = async (req, res) => {
   try {
@@ -59,7 +61,11 @@ const updateUserController = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({ message: "Address updated successfully", user });
+    const savedUser = await formatUserResponse(user);
+    res.status(200).json({
+      message: "Address updated successfully",
+      user: savedUser,
+    });
   } catch (error) {
     res
       .status(500)

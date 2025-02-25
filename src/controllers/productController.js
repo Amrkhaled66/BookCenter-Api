@@ -22,13 +22,8 @@ const upload = multer({
 const getAllProducts = async (req, res) => {
   try {
     const fetchedProducts = await Product.find();
-    //   .select(
-    //   "_id name description price discountPrice imageUrl category note "
-    // );
     const response = fetchedProducts.reduce(
       (result, product) => {
-        // const image = fs.readFileSync(product.imageUrl);
-
         if (product.category === "studentBooks") {
           result.studentBooks.push({ ...product._doc });
         } else if (product.category === "booksAndNovel") {

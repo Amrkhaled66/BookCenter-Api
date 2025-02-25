@@ -1,6 +1,3 @@
-
-
-// "MONGO_URL"
 const requiredVars = ["PORT"];
 
 requiredVars.forEach((key) => {
@@ -11,5 +8,5 @@ requiredVars.forEach((key) => {
 
 export default {
   MONGO_URL: process.env.MONGO_URL,
-  PORT: process.env.PORT ||3000 ,
+  PORT: process.env.PORT || 3000,
 };
