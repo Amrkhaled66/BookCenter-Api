@@ -1,6 +1,6 @@
 const getShippingCost = (req, res) => {
   let { city } = req.query;
-  
+  console.log(city)
   if (!city || city.trim() === "") {  
     return res.status(400).json({ message: "No city provided" });  
   }

@@ -1,5 +1,5 @@
 import express from "express";
-import Product from "../models/product.js";
+import Product from "../models/Product.js";
 
 import multer from "multer";
 import { v4 as uuid } from "uuid";
