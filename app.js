@@ -26,12 +26,12 @@ const app = express();
 
 // Middleware setup
 // app.use(helmet());
-app.use(
-  cors({
-    origin: "http://localhost:5173", // Your frontend URL
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173", // Your frontend URL
+//     credentials: true,
+//   })
+// );
 
 app.use(morgan("dev"));
 app.use(express.json());
