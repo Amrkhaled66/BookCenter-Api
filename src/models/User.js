@@ -15,10 +15,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     match: /^01[0125][0-9]{8}$/,
   },
-
-  birthdate: {
-    type: Date,
-  },
   password: {
     type: String,
     required: true,

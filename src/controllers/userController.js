@@ -1,21 +1,34 @@
 // models
 import User from "../models/User.js";
-import Order from "../models/Order.js";
 import City from "../models/City.js";
 
 import formatUserResponse from "../utils/formatUserResponse.js";
+import formatOrders from "../utils/formatOrders.js";
 
 const getProfileController = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password -id");
+    const { phone } = req.query;
+
+    if (!phone) {
+      return res.status(400).json({ message: "Phone number is required" });
+    }
+
+    const user = await User.findOne({ phone }).select("-password -_id");
+    const orders = await formatOrders(user.orderHistory);
+    const formattedUser = await formatUserResponse(user);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    res.status(200).json(user);
+ 
+    return res.status(200).json({
+      user: formattedUser,
+      orderHistory: orders,
+    });
   } catch (err) {
-    res.status(400).json({ message: err.message || "An error occurred" });
+    return res
+      .status(400)
+      .json({ message: err.message || "An error occurred" });
   }
 };
 
@@ -79,16 +92,9 @@ const getOrdersController = async (req, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
-    const userOrders = [];
-    for (let order of user.orderHistory) {
-      const foundedOrder = await Order.findById(
-        order.orderId.toString()
-      ).populate("products", "name");
-      foundedOrder, order.orderId.toString();
-      userOrders.push(foundedOrder);
-    }
+    const userOrders = await formatOrders(user.orderHistory);
 
     res.status(200).json(userOrders);
   } catch (err) {

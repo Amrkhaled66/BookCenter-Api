@@ -5,40 +5,10 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 
 import formatUserResponse from "../utils/formatUserResponse.js";
-const CookiesOptions = {
-  httpOnly: true, //accessible only by web server
-  secure: true, //https
-  sameSite: "None", //cross-site cookie
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-};
-
-const generateAccessToken = (user) => {
-  return jwt.sign(
-    {
-      id: user._id,
-    },
-    process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "15m" }
-  );
-};
-
-const generateRefreshToken = (user) => {
-  return jwt.sign(
-    {
-      id: user._id,
-    },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: "7d" }
-  );
-};
-
-// Reusable function to generate tokens and set cookies
-const generateTokensAndSetCookie = (user, res) => {
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
-  res.cookie("jwt", refreshToken, CookiesOptions);
-  return accessToken;
-};
+import {
+  generateTokensAndSetCookie,
+  CookiesOptions,
+} from "../services/auth.js";
 
 const signUpController = async (req, res) => {
   try {
@@ -76,8 +46,6 @@ const signUpController = async (req, res) => {
     });
   }
 };
-
-// Reusable function to format user response
 
 const loginController = async (req, res) => {
   try {
@@ -159,7 +127,6 @@ const refresh = async (req, res) => {
   }
 };
 
-
 const logout = (req, res) => {
   try {
     const cookies = req.cookies;
@@ -177,5 +144,7 @@ const logout = (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
 
 export { signUpController, loginController, logout, refresh };

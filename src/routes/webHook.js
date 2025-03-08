@@ -1,15 +1,16 @@
 // routes/webhookRoutes.js
 import { Router } from "express";
 const router = Router();
+
 import {
   handlePaymentConfirmation,
   handleTransactionExpiry,
 } from "../controllers/webHookController.js";
 
 // Route for payment confirmation webhook
-router.post("/webhook/payment-confirmation", handlePaymentConfirmation);
+router.post("/payment-confirmation",handlePaymentConfirmation);
 
 // Route for transaction expiry webhook
-router.post("/webhook/transaction-expiry", handleTransactionExpiry);
+router.post("/transaction-expiry", handleTransactionExpiry);
 
-module.exports = router;
+export default router;

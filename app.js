@@ -19,6 +19,8 @@ import userRoutes from "./src/routes/user.js";
 import orderRoutes from "./src/routes/order.js";
 import cityRoutes from "./src/routes/city.js";
 import invoiceRoutes from "./src/routes/invoice.js";
+import webHooksRoutes from "./src/routes/webHook.js";
+import adminRoutes from "./src/routes/Admin.js";
 
 import getShippingCost from "./src/controllers/shippingController.js";
 const app = express();
@@ -26,9 +28,11 @@ const app = express();
 
 // Middleware setup
 // app.use(helmet());
+
+const urls = ["https://book-center.netlify.app", "http://localhost:5173"];
 app.use(
   cors({
-    origin: "https://book-center.netlify.app",
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
@@ -47,9 +51,10 @@ app.use("/user", userRoutes);
 app.use("/order", orderRoutes);
 app.use("/city", cityRoutes);
 app.use("/invoice", invoiceRoutes);
+app.use("/webhook", webHooksRoutes);
 app.get("/shipping", getShippingCost);
+app.use("/admin", adminRoutes);
 
-// 404 Not Found handler
 app.use(notFoundHandler);
 
 // Global error handler

@@ -9,7 +9,7 @@ const orderSchema = new mongoose.Schema({
         ref: "Product",
         required: true,
       },
-      amount: { type: Number, required: true },
+      quantity: { type: Number, required: true },
     },
   ],
   phone: { type: String, required: true },
@@ -35,6 +35,7 @@ const orderSchema = new mongoose.Schema({
     enum: ["pending", "shipped", "delivered", "cancelled"],
     default: "pending",
   },
+  orderNumber: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

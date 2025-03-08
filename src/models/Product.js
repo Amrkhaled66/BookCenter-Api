@@ -13,9 +13,6 @@ const productSchema = new mongoose.Schema({
   year: { type: Number },
   priority: { type: Number, default: 1 },
   imageUrl: { type: String, default: null },
-  totalStockAdded: { type: Number, default: 0 },
-  ordersCount: { type: Number, default: 0 },
-  returnedToStock: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   note: { type: String, default: null },
 });

@@ -5,9 +5,9 @@ import {
   signUpController,
   loginController,
   refresh,
-  logout
+  logout,
+  
 } from "../controllers/authController.js";
-
 
 // middleware
 const loginLimiter = rateLimit({
@@ -21,8 +21,7 @@ const router = Router();
 // // Authentication
 router.post("/signup", signUpController);
 router.post("/login", loginController);
-router.get("/refreshToken", refresh);
+router.post("/refreshToken", refresh);
 router.post("/logout", logout);
-
 
 export default router;
