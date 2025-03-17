@@ -54,7 +54,6 @@ const loginAdmin = async (req, res) => {
 const registerAdmin = async (req, res) => {
   try {
     const { firstName, lastName, email, password, role } = req.body;
-    console.log(firstName);
     let admin = await Admin.findOne({ email });
     if (admin) return res.status(400).json({ message: "Admin already exists" });
 
@@ -140,7 +139,6 @@ const logout = (req, res) => {
   }
 };
 
-// || ADMIN
 const loginAsUser = async (req, res) => {
   try {
     const { phone } = req.body;

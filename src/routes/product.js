@@ -8,18 +8,20 @@ import {
   addProduct,
   updateProduct,
   deleteProduct,
-  getProductById
+  getProductById,
+  getOptions,
 } from "../controllers/productController.js";
 
+import isAdmin from "../middleware/checkAdmin.js";
+
 router.get("/", getAllProducts);
+router.get("/getOptions", getOptions);
 
-router.post("/", upload.single("imageUrl"), addProduct);
+router.post("/add", isAdmin, upload.single("image"), addProduct);
 
-// , checkAuth
-router.patch("/:productId", updateProduct);
+router.patch("/:productId", isAdmin, upload.single("image"), updateProduct);
 
 router.get("/:productId", getProductById);
-
-router.delete("/:productId", deleteProduct);
+router.delete("/:productId", isAdmin, deleteProduct);
 
 export default router;

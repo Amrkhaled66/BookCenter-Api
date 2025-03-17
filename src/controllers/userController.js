@@ -4,23 +4,24 @@ import City from "../models/City.js";
 
 import formatUserResponse from "../utils/formatUserResponse.js";
 import formatOrders from "../utils/formatOrders.js";
+import argon2 from "argon2";
 
 const getProfileController = async (req, res) => {
   try {
-    const { phone } = req.query;
+    const { id } = req.query;
 
-    if (!phone) {
-      return res.status(400).json({ message: "Phone number is required" });
+    if (!id) {
+      return res.status(400).json({ message: "id is required" });
     }
 
-    const user = await User.findOne({ phone }).select("-password -_id");
+    const user = await User.findById(id).select("-password -_id");
     const orders = await formatOrders(user.orderHistory);
     const formattedUser = await formatUserResponse(user);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
- 
+
     return res.status(200).json({
       user: formattedUser,
       orderHistory: orders,
@@ -102,4 +103,54 @@ const getOrdersController = async (req, res) => {
   }
 };
 
-export { getProfileController, updateUserController, getOrdersController };
+const getUserId = async (req, res) => {
+  try {
+    const { phone } = req.query;
+
+    const foundedUser = await User.findOne({ phone });
+
+    if (!foundedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+
+    res.status(200).json({ id: foundedUser._id });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "server error" });
+  }
+};
+
+const updatePassword = async (req, res) => {
+  try {
+    const { id, password } = req.body;
+
+    if (!id || !password)
+      return res.status(400).json({ message: "Missing fields" });
+
+    const hashedPassword = await argon2.hash(req.body.password);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { password: hashedPassword },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedUser)
+      return res.status(404).json({ message: "User Not Found" });
+
+    res.status(200).json({ message: "Password Updated Successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message || "Server Error" });
+  }
+};
+
+export {
+  getProfileController,
+  updateUserController,
+  getOrdersController,
+  getUserId,
+  updatePassword,
+};

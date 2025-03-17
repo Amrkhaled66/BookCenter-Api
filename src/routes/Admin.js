@@ -7,7 +7,7 @@ import {
   logout,
   refresh,
   loginAsUser
-} from "../controllers/adminController.js";
+} from "../controllers/adminAuthController.js";
 
 const router = Router();
 

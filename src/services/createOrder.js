@@ -18,8 +18,10 @@ const createOrder = async ({
       };
     });
 
-    const city = await City.find({ name: deliveryInfo.city });
+    const city = await City.findOne({ name: deliveryInfo.city });
 
+    if (!city) throw new Error("city no found");
+    
     const orderInfo = {
       products,
       productsPrice: total,

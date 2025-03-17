@@ -5,18 +5,47 @@ const productSchema = new mongoose.Schema({
   skuCode: { type: String, unique: true, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
-  publisher: { type: String, required: true },
   discountPrice: { type: Number, default: null },
-  stockQuantity: { type: Number, required: true },
-  category: { type: String, required: true },
-  subCategory: { type: String },
-  year: { type: Number },
+  inStock: { type: Number, required: true, default: 0 },
+  seller: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Seller",
+  },
+
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Category",
+  },
+  subject: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Subject",
+  },
+  year: { type: String, default: null },
   priority: { type: Number, default: 1 },
-  imageUrl: { type: String, default: null },
+  image: { type: String, default: null },
+  items: [
+    {
+      type: String,
+    },
+  ],
+  visible: { type: Boolean, default: true },
+  isUnAvailable: { type: Boolean, default: false },
+  unAvailabilityNote: { type: String },
   createdAt: { type: Date, default: Date.now },
-  note: { type: String, default: null },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
+productSchema.index({ subject: 1, year: 1, seller: 1 });
+productSchema.index({ category: 1, priority: -1 });
+
+productSchema.pre("findByIdAndUpdate", function (next) {
+  this.set({ updatedAt: Date.now() });
+  next();
+});
+
+const Product =
+  mongoose.models.Product || mongoose.model("Product", productSchema);
 
 export default Product;
