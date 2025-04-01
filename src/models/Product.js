@@ -6,7 +6,6 @@ const productSchema = new mongoose.Schema({
   description: { type: String, required: true },
   price: { type: Number, required: true },
   discountPrice: { type: Number, default: null },
-  inStock: { type: Number, required: true, default: 0 },
   seller: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
@@ -32,6 +31,7 @@ const productSchema = new mongoose.Schema({
   ],
   visible: { type: Boolean, default: true },
   isUnAvailable: { type: Boolean, default: false },
+  isClosed: { type: Boolean, default: false },
   unAvailabilityNote: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

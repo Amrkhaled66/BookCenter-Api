@@ -24,6 +24,7 @@ import adminRoutes from "./src/routes/Admin.js";
 import categoryRoutes from "./src/routes/category.js";
 import subjectRoutes from "./src/routes/subject.js";
 import sellerRoutes from "./src/routes/seller.js";
+import stockRecord from "./src/routes/stock.js";
 
 import getShippingCost from "./src/controllers/shippingController.js";
 const app = express();
@@ -60,6 +61,7 @@ app.use("/admin", adminRoutes);
 app.use("/category", categoryRoutes);
 app.use("/subject", subjectRoutes);
 app.use("/seller", sellerRoutes);
+app.use("/stock", stockRecord);
 
 app.use(notFoundHandler);
 

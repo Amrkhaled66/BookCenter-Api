@@ -2,6 +2,8 @@ import Order from "../models/Order.js";
 import City from "../models/City.js";
 import User from "../models/User.js";
 
+import { INVOICE_EXPIRATION_TIME } from "../services/defaultSettings.js";
+
 const createOrder = async ({
   deliveryInfo,
   orderCart,
@@ -21,7 +23,13 @@ const createOrder = async ({
     const city = await City.findOne({ name: deliveryInfo.city });
 
     if (!city) throw new Error("city no found");
-    
+
+    const expiredAt = new Date();
+    // expiredAt.setHours(expiredAt.getHours() + INVOICE_EXPIRATION_TIME);
+
+    // for testing
+    expiredAt.setMinutes(expiredAt.getMinutes() + 2);
+
     const orderInfo = {
       products,
       productsPrice: total,
@@ -38,7 +46,9 @@ const createOrder = async ({
       },
       phone: deliveryInfo.firstPhone,
       secondaryPhone: deliveryInfo.secondPhone,
+      expiredAt,
     };
+
     const newOrder = new Order({
       userId,
       ...orderInfo,

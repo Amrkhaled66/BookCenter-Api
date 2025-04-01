@@ -7,12 +7,14 @@ import createOrder from "../services/createOrder.js";
 import Order from "../models/Order.js";
 
 import fetchUser from "../utils/fetchUser.js";
+import { reserveStock } from "./stockRecordsController.js";
+
 const createInvoiceController = async (req, res) => {
   try {
     const orderCart = req.body.cart;
     const deliveryInfo = req.body.deliveryInfo;
     const userId = req.user.id;
-
+    
     const user = await fetchUser(userId);
     await updateUserInformation(user, deliveryInfo);
 
@@ -24,6 +26,17 @@ const createInvoiceController = async (req, res) => {
     });
 
     if (!isInvoiceExisted) {
+      for (const item of orderCart) {
+        const {
+          productInfo: { id: productId },
+          quantity,
+        } = item;
+        const reserveResult = await reserveStock(productId, quantity);
+        if (!reserveResult.success) {
+          throw new Error(reserveResult.message);
+        }
+      }
+
       await createOrder({
         deliveryInfo,
         orderCart,

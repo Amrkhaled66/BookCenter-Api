@@ -1,42 +1,31 @@
-import mongoose from "mongoose";
-import Product from "./Product.js";
+import { Schema, model } from "mongoose";
 
-const stockRecordSchema = new mongoose.Schema(
-  {
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
-    inStock: {
-      type: Number,
-    },
-    totalStockAdded: {
-      type: Number,
-      default: 0,
-    },
-    totalReturned: {
-      type: Number,
-      default: 0,
-    },
-    totalDamaged: {
-      type: Number,
-      default: 0,
-    },
+const StockRecordSchema = new Schema({
+  productId: {
+    type: Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
   },
-  { timestamps: true }
-);
-
-stockRecordSchema.post("save", async function (doc) {
-  try {
-    const { product, inStock } = doc;
-
-    // Update the Product's inStock field
-    await Product.findByIdAndUpdate(product, { inStock: inStock });
-  } catch (error) {
-    throw error;
-  }
+  inStock: { type: Number, required: true, default: 0 },
+  totalStockAdded: { type: Number, required: true, default: 0 },
+  reservedStock: { type: Number, required: true, default: 0 },
+  stockHistory: [
+    {
+      type: {
+        type: String,
+        required: true,
+      },
+      quantity: { type: Number, required: true },
+      note: { type: String },
+      date: { type: Date, default: Date.now },
+    },
+  ],
+  updatedAt: { type: Date, default: Date.now },
 });
 
-const StockRecord = mongoose.model("StockRecord", stockRecordSchema);
-export default StockRecord;
+StockRecordSchema.pre("save", function (next) {
+  this.updatedAt = Date.now();
+  next();
+});
+
+export default model("StockRecord", StockRecordSchema);

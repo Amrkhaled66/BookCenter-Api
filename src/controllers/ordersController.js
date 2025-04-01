@@ -10,4 +10,18 @@ const addOrderController = async (req, res) => {
   }
 };
 
-export { addOrderController };
+const getExpiredOrders = async (req, res) => {
+  try {
+    const count = await Order.countDocuments({
+      paymentStatus: "pending",
+      expiredAt: { $lt: new Date() },
+    });
+    return res.status(200).json({ count });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+
+
+export { addOrderController, getExpiredOrders };

@@ -22,7 +22,7 @@ const orderSchema = new mongoose.Schema({
   invoiceLink: { type: String, required: true },
   paymentStatus: {
     type: String,
-    enum: ["pending", "paid", "failed"],
+    enum: ["pending", "paid", "expired"],
     default: "pending",
   },
   shippingAddress: {
@@ -38,6 +38,7 @@ const orderSchema = new mongoose.Schema({
   orderNumber: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  expiredAt: { type: Date, required: true },
 });
 
 // Middleware to update `updatedAt` on changes

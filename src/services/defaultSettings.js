@@ -1,9 +1,5 @@
-const ADMIN_COOKIE="AdminRefresh"
-const USER_COOKIE = "jwt"
+const ADMIN_COOKIE = "AdminRefresh";
+const USER_COOKIE = "jwt";
+const INVOICE_EXPIRATION_TIME = 24;
 
-
-
-export {
-    ADMIN_COOKIE,
-    USER_COOKIE
-}
+export { ADMIN_COOKIE, USER_COOKIE,INVOICE_EXPIRATION_TIME };
