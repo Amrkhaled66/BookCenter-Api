@@ -36,7 +36,7 @@ const app = express();
 const urls = ["https://book-center.netlify.app", "http://localhost:5173"];
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://book-center.netlify.app",
     credentials: true,
   })
 );
