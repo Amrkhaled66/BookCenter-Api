@@ -14,9 +14,9 @@ const createInvoiceController = async (req, res) => {
     const orderCart = req.body.cart;
     const deliveryInfo = req.body.deliveryInfo;
     const userId = req.user.id;
-    
+
     const user = await fetchUser(userId);
-    await updateUserInformation(user, deliveryInfo);
+    const userData = await updateUserInformation(user, deliveryInfo);
 
     const raw = await prepareInvoiceData(orderCart, deliveryInfo, user);
     const invoice = await createInvoice(raw);
@@ -50,6 +50,7 @@ const createInvoiceController = async (req, res) => {
     res.status(200).json({
       invoice: invoice.url,
       message: "Invoice created successfully",
+      userData: userData,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

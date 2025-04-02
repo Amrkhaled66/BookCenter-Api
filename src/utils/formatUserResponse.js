@@ -4,20 +4,20 @@ const formatUserResponse = async (user) => {
   try {
     if (!user) throw new Error("User object is required");
 
-    const city = user.address?.city 
+    const city = user.address?.city
       ? await City.findById(user.address.city).select("name")
       : null;
 
     return {
-      name: user.name || "Unknown",
-      phone: user.phone || "Unknown",
-      birthdate: user.birthdate || "Unknown",
+      name: user.name,
+      phone: user.phone,
+      birthdate: user.birthdate,
       address: {
-        city: city?.name || "Unknown",
-        state: user.address?.state || "Unknown",
-        descriptiveAddress: user.address?.descriptiveAddress || "Not provided",
+        city: city?.name,
+        state: user.address?.state,
+        descriptiveAddress: user.address?.descriptiveAddress,
       },
-      secondaryPhone: user.secondaryPhone || "Not provided",
+      secondaryPhone: user.secondaryPhone,
     };
   } catch (error) {
     console.error("Error in formatUserResponse:", error.message);

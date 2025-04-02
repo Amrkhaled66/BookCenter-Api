@@ -28,6 +28,8 @@ export const updateUserInformation = async (user, deliveryInfo) => {
   if (Object.keys(updateData).length > 0) {
     await User.updateOne({ _id: user._id }, { $set: updateData });
   }
+
+  return updateData;
 };
 
 export const prepareInvoiceData = async (orderCart, deliveryInfo, user) => {

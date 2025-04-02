@@ -146,6 +146,8 @@ const loginAsUser = async (req, res) => {
     const foundUser = await User.findOne({ phone: phone });
     if (!foundUser) return res.status(404).json({ message: "user not found" });
 
+    console.log(foundUser);
+
     const accessToken = generateTokensAndSetCookie(foundUser, res);
     const userResponse = await formatUserResponse(foundUser);
 
