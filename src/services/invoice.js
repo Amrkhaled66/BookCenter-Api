@@ -49,8 +49,8 @@ export const prepareInvoiceData = async (orderCart, deliveryInfo, user) => {
     cartTotal: total,
     shipping: ShippingPrice,
     customer: {
-      first_name: user.name,
-      last_name: "dd",
+      first_name: user.name.split(" ")[0],
+      last_name: user.name.split(" ").slice(1).join(" "),
       phone: user.phone,
       address: deliveryInfo.address,
     },

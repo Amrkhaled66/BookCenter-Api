@@ -48,7 +48,6 @@ const deductReservedStock = async (productId, quantity) => {
         stockRecord.reservedStock = 0;
       }
     }
-    console.log(StockRecord);
 
     await stockRecord.save();
 
@@ -87,7 +86,6 @@ const moveReservedToInStock = async (productId, quantity) => {
 const addStock = async (req, res) => {
   try {
     const { chosenProduct: productId, quantity, note, type } = req.body;
-    console.log(req.body);
 
     const stockRecord = await StockRecord.findOne({ productId });
 
@@ -173,11 +171,6 @@ const checkAndAdjustStock = async (req, res) => {
       }
 
       if (stockRecord.inStock < quantity) {
-        console.log(
-          stockRecord.inStock < quantity,
-          stockRecord.inStock,
-          quantity
-        );
         item.quantity = stockRecord.inStock;
       }
 
