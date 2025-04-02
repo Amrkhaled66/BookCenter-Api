@@ -29,7 +29,10 @@ export const updateUserInformation = async (user, deliveryInfo) => {
     await User.updateOne({ _id: user._id }, { $set: updateData });
   }
 
-  return updateData;
+  return {
+    ...updateData,
+    address: { ...updateData.address, city: deliveryInfo.city },
+  };
 };
 
 export const prepareInvoiceData = async (orderCart, deliveryInfo, user) => {
