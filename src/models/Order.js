@@ -41,6 +41,8 @@ const orderSchema = new mongoose.Schema({
   expiredAt: { type: Date, required: true },
 });
 
+orderSchema.index({ invoiceId: 1});
+
 // Middleware to update `updatedAt` on changes
 orderSchema.pre("save", function (next) {
   this.updatedAt = Date.now();

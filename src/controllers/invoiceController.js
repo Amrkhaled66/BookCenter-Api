@@ -21,31 +21,24 @@ const createInvoiceController = async (req, res) => {
     const raw = await prepareInvoiceData(orderCart, deliveryInfo, user);
     const invoice = await createInvoice(raw);
 
-    const isInvoiceExisted = await Order.findOne({
-      invoiceId: invoice.invoiceId,
+    // reserve the stock
+    const reserveStockPromises = orderCart.map((item) => {
+      const {
+        productInfo: { id: productId },
+        quantity,
+      } = item;
+      return reserveStock(productId, quantity);
     });
+    await Promise.all(reserveStockPromises);
 
-    if (!isInvoiceExisted) {
-      for (const item of orderCart) {
-        const {
-          productInfo: { id: productId },
-          quantity,
-        } = item;
-        const reserveResult = await reserveStock(productId, quantity);
-        if (!reserveResult.success) {
-          throw new Error(reserveResult.message);
-        }
-      }
-
-      await createOrder({
-        deliveryInfo,
-        orderCart,
-        invoice,
-        userId,
-        total: raw.cartTotal,
-        ShippingPrice: raw.shipping,
-      });
-    }
+    await createOrder({
+      deliveryInfo,
+      orderCart,
+      invoice,
+      userId,
+      total: raw.cartTotal,
+      ShippingPrice: raw.shipping,
+    });
 
     res.status(200).json({
       invoice: invoice.url,

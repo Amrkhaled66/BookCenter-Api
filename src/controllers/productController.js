@@ -1,5 +1,5 @@
 import Product from "../models/Product.js";
-import StockRecord from "../models/StockRecord.js"
+import StockRecord from "../models/StockRecord.js";
 
 import multer from "multer";
 import { v4 as uuid } from "uuid";
@@ -162,13 +162,12 @@ const getProductById = async (req, res) => {
       .populate("seller", "name")
       .populate("category", "name")
       .populate("subject", "name")
-      .lean(); 
+      .lean();
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    
     const stockRecord = await StockRecord.findOne({ productId }).lean();
 
     product.inStock = stockRecord ? stockRecord.inStock : 0;
@@ -184,7 +183,6 @@ const addProduct = async (req, res) => {
     const image = req.file ? req.file.path : null;
     const items = req.body.items ? JSON.parse(req.body.items) : [];
 
-    
     const product = new Product({ ...req.body, image, items });
     const newProduct = await product.save();
 
@@ -196,6 +194,7 @@ const addProduct = async (req, res) => {
       productId: newProduct._id,
       inStock: req.body.inStock || 0,
       totalStockAdded: req.body.inStock || 0,
+      sellerPrice: req.body.sellerPrice,
       reservedStock: 0,
     });
 
@@ -271,7 +270,9 @@ const deleteProduct = async (req, res) => {
         if (err) console.error("Failed to delete image:", err);
       });
     }
-    return res.status(200).json({ message: "Product and stock record deleted successfully" });
+    return res
+      .status(200)
+      .json({ message: "Product and stock record deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

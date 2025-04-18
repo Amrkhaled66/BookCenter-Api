@@ -25,10 +25,10 @@ const createOrder = async ({
     if (!city) throw new Error("city no found");
 
     const expiredAt = new Date();
-    // expiredAt.setHours(expiredAt.getHours() + INVOICE_EXPIRATION_TIME);
+    expiredAt.setHours(expiredAt.getHours() + INVOICE_EXPIRATION_TIME);
 
     // for testing
-    expiredAt.setMinutes(expiredAt.getMinutes() + 2);
+    // expiredAt.setSeconds(expiredAt.getSeconds() + 20);
 
     const orderInfo = {
       products,
@@ -62,6 +62,7 @@ const createOrder = async ({
       },
       { new: true }
     );
+
     return newOrder;
   } catch (err) {
     throw err;

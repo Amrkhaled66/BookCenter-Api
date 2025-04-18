@@ -8,6 +8,7 @@ import {
 
 import axios from "axios";
 
+import { INVOICE_EXPIRATION_TIME } from "./defaultSettings.js";
 export const updateUserInformation = async (user, deliveryInfo) => {
   const updateData = {};
   if (!user.secondaryPhone && deliveryInfo.secondPhone) {
@@ -31,7 +32,11 @@ export const updateUserInformation = async (user, deliveryInfo) => {
 
   return {
     ...updateData,
-    address: { ...updateData.address, city: deliveryInfo.city },
+    address: {
+      city: deliveryInfo.city,
+      state: deliveryInfo.state,
+      descriptiveAddress: deliveryInfo.descriptiveAddress,
+    },
   };
 };
 
@@ -41,8 +46,15 @@ export const prepareInvoiceData = async (orderCart, deliveryInfo, user) => {
   const ShippingPrice = getShippingPrice(deliveryInfo.city);
 
   const date = new Date();
-  date.setDate(date.getDate() + 1);
-  const nextDay = new Intl.DateTimeFormat("en-CA").format(date);
+  date.setHours(date.getHours() + INVOICE_EXPIRATION_TIME);
+  const nextDay = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
 
   return {
     cartItems,

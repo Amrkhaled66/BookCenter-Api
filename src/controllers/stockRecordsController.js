@@ -199,53 +199,57 @@ const getStockRecordById = async (req, res) => {
 
 const releaseReservedStock = async (req, res) => {
   try {
+    // 1. Find expired orders with lean() for better performance
     const expiredOrders = await Order.find({
       paymentStatus: "pending",
       expiredAt: { $lt: new Date() },
-    });
+    }).lean();
 
-    if (expiredOrders.length === 0) {
-      return res
-        .status(200)
-        .json({ success: true, message: "No expired orders found" });
+    if (!expiredOrders.length) {
+      return res.status(200).json({ 
+        success: true, 
+        message: "No expired orders found" 
+      });
     }
 
-    const stockUpdates = [];
-    const orderIds = [];
-
-    for (const order of expiredOrders) {
-      orderIds.push(order._id);
-
-      for (const item of order.products) {
-        stockUpdates.push({
-          updateOne: {
-            filter: { productId: item.product },
-            update: {
-              $inc: { reservedStock: -item.quantity, inStock: item.quantity },
-            },
+    // 2. Prepare all operations in parallel
+    const orderIds = expiredOrders.map(order => order._id);
+    
+    const stockUpdates = expiredOrders.flatMap(order => 
+      order.products.map(item => ({
+        updateOne: {
+          filter: { productId: item.product },
+          update: { 
+            $inc: { 
+              reservedStock: -item.quantity, 
+              inStock: item.quantity 
+            } 
           },
-        });
-      }
-    }
-
-    if (stockUpdates.length > 0) {
-      await StockRecord.bulkWrite(stockUpdates);
-    }
-
-    await Order.updateMany(
-      { _id: { $in: orderIds } },
-      { $set: { paymentStatus: "expired" } }
+        }
+      }))
     );
+
+    // 3. Execute all updates in parallel using Promise.all
+    await Promise.all([
+      stockUpdates.length ? StockRecord.bulkWrite(stockUpdates) : Promise.resolve(),
+      Order.updateMany(
+        { _id: { $in: orderIds } },
+        { $set: { paymentStatus: "expired" } }
+      )
+    ]);
 
     return res.status(200).json({
       success: true,
       message: `${expiredOrders.length} orders processed. Reserved stock released.`,
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error('Error in releaseReservedStock:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 };
-
 export {
   reserveStock,
   deductReservedStock,
