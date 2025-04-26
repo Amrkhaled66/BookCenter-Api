@@ -1,10 +1,12 @@
 import StockRecord from "../models/StockRecord.js";
 import nodemailer from "nodemailer";
 import Order from "../models/Order.js";
+import Product from "../models/Product.js";
 
 const reserveStock = async (productId, quantity) => {
   try {
     const stockRecord = await StockRecord.findOne({ productId });
+    const product = await Product.findById(productId);
 
     if (!stockRecord) {
       throw new Error("Stock record not found");
@@ -14,10 +16,16 @@ const reserveStock = async (productId, quantity) => {
       throw new Error("Not enough stock available");
     }
 
+  
     stockRecord.inStock -= quantity;
     stockRecord.reservedStock += quantity;
+    stockRecord.totalReserved += quantity;
+
+    product.totalOrders += 1;
+    product.totalReserved += quantity;
 
     await stockRecord.save();
+    await product.save();
 
     return { success: true, message: "Stock reserved successfully" };
   } catch (error) {
@@ -28,6 +36,7 @@ const reserveStock = async (productId, quantity) => {
 const deductReservedStock = async (productId, quantity) => {
   try {
     const stockRecord = await StockRecord.findOne({ productId });
+    const product = await Product.findById(productId);
 
     if (!stockRecord) {
       throw new Error("Stock record not found");
@@ -49,7 +58,9 @@ const deductReservedStock = async (productId, quantity) => {
       }
     }
 
+    product.totalPaid += quantity;
     await stockRecord.save();
+    await product.save();
 
     return { success: true, message: "Stock deducted successfully" };
   } catch (error) {
@@ -206,36 +217,38 @@ const releaseReservedStock = async (req, res) => {
     }).lean();
 
     if (!expiredOrders.length) {
-      return res.status(200).json({ 
-        success: true, 
-        message: "No expired orders found" 
+      return res.status(200).json({
+        success: true,
+        message: "No expired orders found",
       });
     }
 
     // 2. Prepare all operations in parallel
-    const orderIds = expiredOrders.map(order => order._id);
-    
-    const stockUpdates = expiredOrders.flatMap(order => 
-      order.products.map(item => ({
+    const orderIds = expiredOrders.map((order) => order._id);
+
+    const stockUpdates = expiredOrders.flatMap((order) =>
+      order.products.map((item) => ({
         updateOne: {
           filter: { productId: item.product },
-          update: { 
-            $inc: { 
-              reservedStock: -item.quantity, 
-              inStock: item.quantity 
-            } 
+          update: {
+            $inc: {
+              reservedStock: -item.quantity,
+              inStock: item.quantity,
+            },
           },
-        }
+        },
       }))
     );
 
     // 3. Execute all updates in parallel using Promise.all
     await Promise.all([
-      stockUpdates.length ? StockRecord.bulkWrite(stockUpdates) : Promise.resolve(),
+      stockUpdates.length
+        ? StockRecord.bulkWrite(stockUpdates)
+        : Promise.resolve(),
       Order.updateMany(
         { _id: { $in: orderIds } },
         { $set: { paymentStatus: "expired" } }
-      )
+      ),
     ]);
 
     return res.status(200).json({
@@ -243,10 +256,10 @@ const releaseReservedStock = async (req, res) => {
       message: `${expiredOrders.length} orders processed. Reserved stock released.`,
     });
   } catch (error) {
-    console.error('Error in releaseReservedStock:', error);
-    return res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    console.error("Error in releaseReservedStock:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };

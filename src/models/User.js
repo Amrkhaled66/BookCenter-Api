@@ -20,9 +20,13 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   address: {
-    city: { type: mongoose.Schema.Types.ObjectId, ref: "City"},
+    city: { type: mongoose.Schema.Types.ObjectId, ref: "City" },
     state: { type: String },
     descriptiveAddress: { type: String },
+  },
+  points: {
+    type: Number,
+    default: 0,
   },
   orderHistory: [
     {

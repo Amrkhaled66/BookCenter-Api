@@ -32,13 +32,17 @@ const productSchema = new mongoose.Schema({
   isUnAvailable: { type: Boolean, default: false },
   isClosed: { type: Boolean, default: false },
   unAvailabilityNote: { type: String },
+  totalPaid: { type: Number, default: 0 },
+  totalOrders: { type: Number, default: 0 },
+  totalReserved: { type: Number, default: 0 },
+  sellerPrice: { type: Number },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
 productSchema.index({ subject: 1, year: 1, seller: 1 });
 productSchema.index({ category: 1, priority: -1 });
-
+productSchema.index({ name: 1 });
 productSchema.pre("findByIdAndUpdate", function (next) {
   this.set({ updatedAt: Date.now() });
   next();

@@ -78,8 +78,8 @@ const getAllProducts = async (req, res) => {
               description: "$description",
               price: "$price",
               discountPrice: "$discountPrice",
-              inStock: { $ifNull: ["$stockDetails.inStock", 0] }, // Ensure default value if no stock record
-              reservedStock: { $ifNull: ["$stockDetails.reservedStock", 0] }, // Include reserved stock
+              inStock: { $ifNull: ["$stockDetails.inStock", 0] },
+              reservedStock: { $ifNull: ["$stockDetails.reservedStock", 0] },
               year: "$year",
               priority: "$priority",
               image: "$image",
@@ -158,7 +158,10 @@ const getProductById = async (req, res) => {
   try {
     const { productId } = req.params;
 
-    const product = await Product.findById(productId)
+    const product = await Product.findById(
+      productId,
+      "-totalPaid -totalOrders -sellerPrice"
+    )
       .populate("seller", "name")
       .populate("category", "name")
       .populate("subject", "name")
@@ -169,8 +172,6 @@ const getProductById = async (req, res) => {
     }
 
     const stockRecord = await StockRecord.findOne({ productId }).lean();
-
-    product.inStock = stockRecord ? stockRecord.inStock : 0;
 
     res.status(200).json(product);
   } catch (err) {
@@ -183,7 +184,11 @@ const addProduct = async (req, res) => {
     const image = req.file ? req.file.path : null;
     const items = req.body.items ? JSON.parse(req.body.items) : [];
 
-    const product = new Product({ ...req.body, image, items });
+    const product = new Product({
+      ...req.body,
+      image,
+      items,
+    });
     const newProduct = await product.save();
 
     if (!newProduct) {
@@ -194,7 +199,6 @@ const addProduct = async (req, res) => {
       productId: newProduct._id,
       inStock: req.body.inStock || 0,
       totalStockAdded: req.body.inStock || 0,
-      sellerPrice: req.body.sellerPrice,
       reservedStock: 0,
     });
 
@@ -278,6 +282,41 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const getProduct4Admin = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findById(productId)
+      .populate("seller", "name")
+      .populate("category", "name")
+      .populate("subject", "name")
+      .lean();
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json(product);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+const getProductByName4Admin = async (req, res) => {
+  try {
+    const { searchText } = req.query;
+    console.log(searchText);
+    const product = await Product.find({ name: { $regex: searchText } });
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json(product);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
 export {
   getAllProducts,
   getProductById,
@@ -286,4 +325,6 @@ export {
   deleteProduct,
   upload,
   getOptions,
+  getProduct4Admin,
+  getProductByName4Admin,
 };

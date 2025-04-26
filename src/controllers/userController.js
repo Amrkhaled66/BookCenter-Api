@@ -113,7 +113,6 @@ const getUserId = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-
     res.status(200).json({ id: foundedUser._id });
   } catch (err) {
     res.status(500).json({ error: err.message || "server error" });
@@ -147,10 +146,25 @@ const updatePassword = async (req, res) => {
   }
 };
 
+const getUserByPhone = async (req, res) => {
+  try {
+    const { phone } = req.query;
+    console.log(phone);
+    const user = await User.findOne({ phone });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message || "server error" });
+  }
+};
+
 export {
   getProfileController,
   updateUserController,
   getOrdersController,
   getUserId,
   updatePassword,
+  getUserByPhone,
 };

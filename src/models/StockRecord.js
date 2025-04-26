@@ -9,9 +9,6 @@ const StockRecordSchema = new Schema({
   inStock: { type: Number, required: true, default: 0 },
   totalStockAdded: { type: Number, required: true, default: 0 },
   reservedStock: { type: Number, required: true, default: 0 },
-  sellerPrice: { type: Number},
-  totalPaid: { type: Number, default: 0 },
-  totalOrders: { type: Number, default: 0 },
   stockHistory: [
     {
       type: {
