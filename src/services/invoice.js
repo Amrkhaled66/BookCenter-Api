@@ -3,12 +3,13 @@ import City from "../models/City.js";
 import {
   getOrderCart,
   getOrderTotal,
-  getShippingPrice,
+  
 } from "../services/cart/getOrderCart.js";
 
+import getShippingCost from "../controllers/shippingController.js";
 import axios from "axios";
 
-import { INVOICE_EXPIRATION_TIME } from "./defaultSettings.js";
+import { INVOICE_EXPIRATION_TIME, NEXT_ITEMS_FEES } from "./defaultSettings.js";
 export const updateUserInformation = async (user, deliveryInfo) => {
   const updateData = {};
   if (!user.secondaryPhone && deliveryInfo.secondPhone) {
@@ -43,7 +44,12 @@ export const updateUserInformation = async (user, deliveryInfo) => {
 export const prepareInvoiceData = async (orderCart, deliveryInfo, user) => {
   const cartItems = await getOrderCart(orderCart);
   const total = await getOrderTotal(orderCart);
-  const ShippingPrice = getShippingPrice(deliveryInfo.city);
+  const cartLength = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+  const ShippingPrice =
+    getShippingCost(deliveryInfo.city) + (cartLength - 1) * NEXT_ITEMS_FEES;
 
   const date = new Date();
   date.setHours(date.getHours() + INVOICE_EXPIRATION_TIME);

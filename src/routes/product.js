@@ -11,6 +11,7 @@ import {
   getProductById,
   getOptions,
   getProduct4Admin,
+  getProducts4Admin,
   getProductByName4Admin,
 } from "../controllers/productController.js";
 
@@ -25,6 +26,7 @@ router.patch("/:productId", isAdmin, upload.single("image"), updateProduct);
 router.delete("/:productId", isAdmin, deleteProduct);
 
 router.get("/admin/getProductByName", isAdmin, getProductByName4Admin);
+router.get("/admin/get", isAdmin, getProducts4Admin);
 router.get("/admin/:productId", isAdmin, getProduct4Admin);
 router.get("/user", getAllProducts);
 router.get("/:productId", getProductById);

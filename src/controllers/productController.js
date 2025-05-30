@@ -317,6 +317,61 @@ const getProductByName4Admin = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+const getProducts4Admin = async (req, res) => {
+  try {
+    const { skuCode, product, category, seller, subject } = req.query;
+
+    // Build the filter dynamically
+    const filter = {};
+
+    if (skuCode) {
+      filter.skuCode = skuCode;
+    }
+    if (product) {
+      filter._id = product;
+    }
+    if (category) {
+      filter.category = category;
+    }
+    if (seller) {
+      filter.seller = seller;
+    }
+    if (subject) {
+      filter.subject = subject;
+    }
+
+    // Fetch products based on filters and populate seller
+    const products = await Product.find(filter).populate("seller", "name").lean();
+
+    const productIds = products.map((product) => product._id);
+
+    const stockRecords = await StockRecord.find({
+      productId: { $in: productIds },
+    }).lean();
+
+    const stockMap = {};
+    stockRecords.forEach((record) => {
+      stockMap[record.productId.toString()] = {
+        inStock: record.inStock,
+        totalStockAdded: record.totalStockAdded,
+      };
+    });
+
+    const productsWithStock = products.map((product) => {
+      const productId = product._id.toString();
+      return {
+        ...product,
+        ...stockMap[productId],
+      };
+    });
+
+    res.status(200).json({ products: productsWithStock });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
 export {
   getAllProducts,
   getProductById,
@@ -327,4 +382,5 @@ export {
   getOptions,
   getProduct4Admin,
   getProductByName4Admin,
+  getProducts4Admin,
 };

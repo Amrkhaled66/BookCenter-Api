@@ -4,8 +4,6 @@ import {
   prepareInvoiceData,
 } from "../services//invoice.js";
 import createOrder from "../services/createOrder.js";
-import Order from "../models/Order.js";
-
 import fetchUser from "../utils/fetchUser.js";
 import { reserveStock } from "./stockRecordsController.js";
 

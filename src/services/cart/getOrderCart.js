@@ -1,5 +1,4 @@
 import Product from "../../models/Product.js";
-
 // Function to get order cart with valid async handling
 const getOrderCart = async (cart) => {
   try {
@@ -37,13 +36,6 @@ const getOrderTotal = async (cart) => {
   }
 };
 
-// Shipping price function remains unchanged
-const getShippingPrice = (city) => {
-  city = city.toLowerCase();
-  if (city === "cairo" || city === "giza") {
-    return 55;
-  }
-  return 60;
-};
 
-export { getOrderCart, getOrderTotal, getShippingPrice };
+
+export { getOrderCart, getOrderTotal };
