@@ -305,7 +305,6 @@ const getProduct4Admin = async (req, res) => {
 const getProductByName4Admin = async (req, res) => {
   try {
     const { searchText } = req.query;
-    console.log(searchText);
     const product = await Product.find({ name: { $regex: searchText } });
 
     if (!product) {

@@ -17,6 +17,8 @@ const createInvoiceController = async (req, res) => {
     const userData = await updateUserInformation(user, deliveryInfo);
 
     const raw = await prepareInvoiceData(orderCart, deliveryInfo, user);
+    console.log(raw);
+
     const invoice = await createInvoice(raw);
 
     // reserve the stock
@@ -44,6 +46,7 @@ const createInvoiceController = async (req, res) => {
       userData: userData,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };

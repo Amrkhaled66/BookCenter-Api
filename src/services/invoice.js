@@ -1,15 +1,12 @@
 import User from "../models/User.js";
 import City from "../models/City.js";
-import {
-  getOrderCart,
-  getOrderTotal,
-  
-} from "../services/cart/getOrderCart.js";
+import { getOrderCart, getOrderTotal } from "../services/cart/getOrderCart.js";
 
-import getShippingCost from "../controllers/shippingController.js";
 import axios from "axios";
+import getShippingPrice from "../utils/getShippingPrice.js";
 
-import { INVOICE_EXPIRATION_TIME, NEXT_ITEMS_FEES } from "./defaultSettings.js";
+import { INVOICE_EXPIRATION_TIME } from "./defaultSettings.js";
+import SiteConfig from "../models/SiteConfig.js";
 export const updateUserInformation = async (user, deliveryInfo) => {
   const updateData = {};
   if (!user.secondaryPhone && deliveryInfo.secondPhone) {
@@ -44,15 +41,18 @@ export const updateUserInformation = async (user, deliveryInfo) => {
 export const prepareInvoiceData = async (orderCart, deliveryInfo, user) => {
   const cartItems = await getOrderCart(orderCart);
   const total = await getOrderTotal(orderCart);
-  const cartLength = cartItems.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
-  const ShippingPrice =
-    getShippingCost(deliveryInfo.city) + (cartLength - 1) * NEXT_ITEMS_FEES;
+  const cartLength = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  const config = await SiteConfig.findOne();
+  if (!config) throw new Error("Site config not found");
+
+  const baseShipping = await getShippingPrice(deliveryInfo.city);
+
+  const ShippingPrice = baseShipping + (cartLength - 1) * config?.nextItemFees;
 
   const date = new Date();
   date.setHours(date.getHours() + INVOICE_EXPIRATION_TIME);
+
   const nextDay = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
     month: "2-digit",
@@ -67,8 +67,8 @@ export const prepareInvoiceData = async (orderCart, deliveryInfo, user) => {
     cartTotal: total,
     shipping: ShippingPrice,
     customer: {
-      first_name: user.name.split(" ")[0],
-      last_name: user.name.split(" ").slice(1).join(" "),
+      first_name: user.name?.split(" ")[0] || "",
+      last_name: user.name?.split(" ").slice(1).join(" ") || "",
       phone: user.phone,
       address: deliveryInfo.address,
     },

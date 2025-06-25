@@ -3,7 +3,7 @@ import ManualOrder from "../models/ManualOrder.js";
 import User from "../models/User.js";
 import Product from "../models/Product.js";
 import City from "../models/City.js";
-import getShippingCost from "./shippingController.js";
+import getShippingPrice from "../utils/getShippingPrice.js";
 /**
  * Creates a manual order for existing users identified by phone number
  * Supports reverse orders, damage orders, and paid orders
@@ -74,7 +74,7 @@ async function processManualOrder(user, orderCart, type, note, parentOrderId) {
     throw new Error("User city not found");
   }
 
-  const shippingPrice = getShippingCost(city.name);
+  const shippingPrice = getShippingPrice(city.name.toLowerCase());
   const totalPrice = productsPrice + shippingPrice;
 
   // Reserve stock for all products
@@ -127,11 +127,11 @@ async function processOrderItems(orderCart) {
  * Reserve stock for all products in the order
  */
 async function reserveOrderStock(orderCart) {
-  const reservePromises = orderCart.map(async(item) => {
-    const product =await Product.findById(item.productId);  
-    product.totalPaid+=item.quantity;
+  const reservePromises = orderCart.map(async (item) => {
+    const product = await Product.findById(item.productId);
+    product.totalPaid += item.quantity;
     product.totalOrders += 1;
-    
+
     return product.save();
   });
 

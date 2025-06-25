@@ -149,7 +149,7 @@ const updatePassword = async (req, res) => {
 const getUserByPhone = async (req, res) => {
   try {
     const { phone } = req.query;
-    console.log(phone);
+
     const user = await User.findOne({ phone });
     if (!user) {
       return res.status(404).json({ message: "User not found" });

@@ -26,8 +26,8 @@ import subjectRoutes from "./src/routes/subject.js";
 import sellerRoutes from "./src/routes/seller.js";
 import stockRecord from "./src/routes/stock.js";
 import manualOrderRoutes from "./src/routes/manualOrderRoutes.js";
+import configRoutes from "./src/routes/config.js";
 
-import getShippingCost from "./src/controllers/shippingController.js";
 const app = express();
 // app.use(mongoSanitize());
 
@@ -43,7 +43,7 @@ const urls = ["https://book-center.netlify.app", "http://localhost:5173"];
 // );
 app.use(
   cors({
-    origin: "http://localhost:3001",
+    origin: "https://book-center.netlify.app",
     credentials: true,
   })
 );
@@ -63,13 +63,13 @@ app.use("/order", orderRoutes);
 app.use("/city", cityRoutes);
 app.use("/invoice", invoiceRoutes);
 app.use("/webhook", webHooksRoutes);
-app.get("/shipping", getShippingCost);
 app.use("/admin", adminRoutes);
 app.use("/category", categoryRoutes);
 app.use("/subject", subjectRoutes);
 app.use("/seller", sellerRoutes);
 app.use("/stock", stockRecord);
 app.use("/manualOrder", manualOrderRoutes);
+app.use("/site-config", configRoutes);
 
 app.use(notFoundHandler);
 

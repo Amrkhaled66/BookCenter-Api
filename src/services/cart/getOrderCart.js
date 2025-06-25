@@ -6,9 +6,9 @@ const getOrderCart = async (cart) => {
       cart.map(async ({ productInfo: { id }, quantity }) => {
         const product = await Product.findById(id);
         if (!product) throw new Error(`Product with ID ${id} not found`);
-        return {
+                      return {
           name: product.name,
-          price: product.price,
+          price: product.discountPrice||product.price,
           quantity,
         };
       })
@@ -20,14 +20,15 @@ const getOrderCart = async (cart) => {
   }
 };
 
-// Function to correctly calculate order total
+
 const getOrderTotal = async (cart) => {
   try {
     let total = 0;
     for (const item of cart) {
       const product = await Product.findById(item.productInfo.id);
       if (!product) throw new Error(`Product with ID ${item.productInfo.id} not found`);
-      total += product.price * item.quantity;
+      const productMainPrice = product.discountPrice || product.price;
+      total += productMainPrice * item.quantity;
     }
     return total;
   } catch (error) {

@@ -27,8 +27,6 @@ const createOrder = async ({
     const expiredAt = new Date();
     expiredAt.setHours(expiredAt.getHours() + INVOICE_EXPIRATION_TIME);
 
-    // for testing
-    // expiredAt.setSeconds(expiredAt.getSeconds() + 20);
 
     const orderInfo = {
       products,
