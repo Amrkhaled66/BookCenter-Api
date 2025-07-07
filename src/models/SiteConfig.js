@@ -33,6 +33,11 @@ const siteConfigSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    invoiceEndedHours: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
     nextItemFees: {
       type: Number,
       required: true,

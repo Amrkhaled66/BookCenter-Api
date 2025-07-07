@@ -42,9 +42,12 @@ const orderSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   expiredAt: { type: Date },
+  lastProcessedAt: { type: Date, default: null }, // <-- Add this field
 });
 
-orderSchema.index({ invoiceId: 1 });
+// Create indexes for `paymentStatus` and `expiredAt`
+orderSchema.index({ paymentStatus: 1, expiredAt: 1 });
+orderSchema.index({ lastProcessedAt: 1 }); // <-- Index on `lastProcessedAt`
 
 // Middleware to update `updatedAt` on changes
 orderSchema.pre("save", function (next) {

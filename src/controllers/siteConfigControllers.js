@@ -23,9 +23,7 @@ export async function getSiteConfig(req, res) {
     const config = await SiteConfig.findOne();
 
     if (!config) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Config not found" });
+      return res.status(200).json({ success: true, config: {} });
     }
 
     res.status(200).json({ success: true, config });

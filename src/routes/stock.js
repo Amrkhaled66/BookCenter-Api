@@ -3,7 +3,6 @@ import {
   addStock,
   moveReservedToInStock,
   deductReservedStock,
-  releaseReservedStock,
   checkAndAdjustStock,
   getStockRecordById,
 } from "../controllers/stockRecordsController.js";
@@ -26,7 +25,7 @@ router.post("/check-and-edit-cart", checkAndAdjustStock);
 
 router.get("/:id", isAdmin, getStockRecordById);
 
-router.post("/releaseReservedStock", isAdmin, releaseReservedStock);
+// router.post("/releaseReservedStock", isAdmin, releaseReservedStock);
 
 
 export default router;

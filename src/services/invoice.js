@@ -51,7 +51,7 @@ export const prepareInvoiceData = async (orderCart, deliveryInfo, user) => {
   const ShippingPrice = baseShipping + (cartLength - 1) * config?.nextItemFees;
 
   const date = new Date();
-  date.setHours(date.getHours() + INVOICE_EXPIRATION_TIME);
+  date.setHours(date.getHours() + config.invoiceEndedHours);
 
   const nextDay = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
