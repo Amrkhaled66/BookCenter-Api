@@ -27,6 +27,7 @@ import sellerRoutes from "./src/routes/seller.js";
 import stockRecord from "./src/routes/stock.js";
 import manualOrderRoutes from "./src/routes/manualOrderRoutes.js";
 import configRoutes from "./src/routes/config.js";
+import analyticsRoutes from "./src/routes/analytics.js"
 
 const app = express();
 // app.use(mongoSanitize());
@@ -65,6 +66,7 @@ app.use("/seller", sellerRoutes);
 app.use("/stock", stockRecord);
 app.use("/manualOrder", manualOrderRoutes);
 app.use("/site-config", configRoutes);
+app.use("/analytics", analyticsRoutes);
 
 app.use(notFoundHandler);
 
