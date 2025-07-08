@@ -5,21 +5,24 @@ import Order from "../models/Order.js";
 import { deductReservedStock } from "./stockRecordsController.js";
 
 // Utility function to generate hashKey
-const generateHashKey = (data, secretKey) => {
+const generateHashKey = (data) => {
+  const secretKey = process.env.FAWATERK_API_KEY || "FAWATERAK_VENDOR_KEY";
   const queryParam = `InvoiceId=${data.invoice_id}&InvoiceKey=${data.invoice_key}&PaymentMethod=${data.payment_method}`;
-  return crypto
-    .createHmac("sha256", secretKey)
-    .update(queryParam)
-    .digest("hex");
+  return crypto.createHmac("sha256", secretKey).update(queryParam).digest("hex");
 };
 
 // Handle payment confirmation webhook
 const handlePaymentConfirmation = async (req, res) => {
   try {
-    const { invoice_id, invoice_status, api_key } = req.body;
-
+    const { invoice_id, invoice_status, api_key, hashKey } = req.body;
     // Security check for API key
-    if (api_key !== process.env.FAWATERK_API_KEY) {
+    // if (api_key !== process.env.FAWATERK_API_KEY) {
+    //   console.log("API key mismatch");
+    //   return res.status(401).json({ message: "Unauthorized" });
+    // }
+    
+    if (hashKey !== generateHashKey(req.body)) {
+      console.log("API key mismatch");
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -27,7 +30,7 @@ const handlePaymentConfirmation = async (req, res) => {
     const updatedOrder = await Order.findOneAndUpdate(
       { invoiceId: invoice_id },
       { $set: { paymentStatus: invoice_status } },
-      { new: true } 
+      { new: true }
     );
 
     // Handle case when order is not found
