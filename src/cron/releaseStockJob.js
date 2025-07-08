@@ -4,7 +4,7 @@ import releaseReservedStock from "../services/releaseReservedStock.js";
 let isJobRunning = false; // Lock flag to prevent overlap
 
 // Run the cron job every minute
-cron.schedule("*/3 * * * *", async () => {
+cron.schedule("* * * * *", async () => {
   if (isJobRunning) {
     console.log("🔒 Cron job is already running. Skipping this cycle.");
     return;

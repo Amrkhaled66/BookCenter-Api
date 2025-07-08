@@ -6,17 +6,15 @@ const releaseReservedStock = async () => {
     const batchSize = 100; // Number of orders to process per batch
     let skip = 0;
     let hasMoreOrders = true;
-    const lastProcessedAt = new Date(); // Record the current time to track processing
 
     // Loop to process orders in batches
     while (hasMoreOrders) {
       const expiredOrders = await Order.find({
         paymentStatus: "pending",
         expiredAt: { $lt: new Date() },
-        lastProcessedAt: { $lte: lastProcessedAt }, // Only fetch orders not processed yet
       })
-        .skip(skip)  // Skip previous batch
-        .limit(batchSize)  // Limit to 100 orders per batch
+        .skip(skip) // Skip previous batch
+        .limit(batchSize) // Limit to 100 orders per batch
         .lean();
 
       if (expiredOrders.length === 0) {
@@ -26,7 +24,7 @@ const releaseReservedStock = async () => {
       }
 
       const orderIds = expiredOrders.map((order) => order._id);
-
+      console.log(`🔁 Processing ${orderIds} orders...`);
       const stockUpdates = expiredOrders.flatMap((order) =>
         order.products.map((item) => ({
           updateOne: {
@@ -42,7 +40,9 @@ const releaseReservedStock = async () => {
       );
 
       await Promise.all([
-        stockUpdates.length ? StockRecord.bulkWrite(stockUpdates) : Promise.resolve(),
+        stockUpdates.length
+          ? StockRecord.bulkWrite(stockUpdates)
+          : Promise.resolve(),
         Order.updateMany(
           { _id: { $in: orderIds } },
           { $set: { paymentStatus: "expired", lastProcessedAt: new Date() } } // Set `lastProcessedAt`

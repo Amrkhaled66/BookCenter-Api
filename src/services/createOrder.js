@@ -1,8 +1,7 @@
 import Order from "../models/Order.js";
 import City from "../models/City.js";
 import User from "../models/User.js";
-
-import { INVOICE_EXPIRATION_TIME } from "../services/defaultSettings.js";
+import SiteConfig from "../models/SiteConfig.js";
 
 const createOrder = async ({
   deliveryInfo,
@@ -24,9 +23,13 @@ const createOrder = async ({
 
     if (!city) throw new Error("city no found");
 
+    
+    
+    const config = await SiteConfig.findOne();
+    if (!config) throw new Error("Site config not found");
+    
     const expiredAt = new Date();
-    expiredAt.setHours(expiredAt.getHours() + INVOICE_EXPIRATION_TIME);
-
+    expiredAt.setHours(expiredAt.getHours() + config.invoiceEndedHours);
 
     const orderInfo = {
       products,

@@ -5,7 +5,6 @@ import { getOrderCart, getOrderTotal } from "../services/cart/getOrderCart.js";
 import axios from "axios";
 import getShippingPrice from "../utils/getShippingPrice.js";
 
-import { INVOICE_EXPIRATION_TIME } from "./defaultSettings.js";
 import SiteConfig from "../models/SiteConfig.js";
 export const updateUserInformation = async (user, deliveryInfo) => {
   const updateData = {};
@@ -53,7 +52,7 @@ export const prepareInvoiceData = async (orderCart, deliveryInfo, user) => {
   const date = new Date();
   date.setHours(date.getHours() + config.invoiceEndedHours);
 
-  const nextDay = new Intl.DateTimeFormat("en-CA", {
+  const dueData = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -74,7 +73,7 @@ export const prepareInvoiceData = async (orderCart, deliveryInfo, user) => {
     },
     currency: "EGP",
     sendSMS: true,
-    due_date: nextDay,
+    due_date: dueData,
   };
 };
 

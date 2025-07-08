@@ -42,7 +42,6 @@ const orderSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   expiredAt: { type: Date },
-  lastProcessedAt: { type: Date, default: null }, // <-- Add this field
 });
 
 // Create indexes for `paymentStatus` and `expiredAt`
