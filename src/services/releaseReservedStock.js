@@ -3,7 +3,7 @@ import StockRecord from "../models/StockRecord.js";
 
 const releaseReservedStock = async () => {
   try {
-    const batchSize = 100; // Number of orders to process per batch
+    const batchSize = 100; 
     let skip = 0;
     let hasMoreOrders = true;
 
