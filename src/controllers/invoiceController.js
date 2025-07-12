@@ -5,7 +5,7 @@ import {
 } from "../services//invoice.js";
 import createOrder from "../services/createOrder.js";
 import fetchUser from "../utils/fetchUser.js";
-import { reserveStock } from "./stockRecordsController.js";
+import { reserveStockForOrder } from "./stockRecordsController.js";
 
 const createInvoiceController = async (req, res) => {
   try {
@@ -17,19 +17,10 @@ const createInvoiceController = async (req, res) => {
     const userData = await updateUserInformation(user, deliveryInfo);
 
     const raw = await prepareInvoiceData(orderCart, deliveryInfo, user);
-    console.log(raw);
-
+    
     const invoice = await createInvoice(raw);
 
-    // reserve the stock
-    const reserveStockPromises = orderCart.map((item) => {
-      const {
-        productInfo: { id: productId },
-        quantity,
-      } = item;
-      return reserveStock(productId, quantity);
-    });
-    await Promise.all(reserveStockPromises);
+    await reserveStockForOrder(orderCart);
 
     await createOrder({
       deliveryInfo,

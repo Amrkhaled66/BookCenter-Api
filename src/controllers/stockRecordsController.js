@@ -3,33 +3,82 @@ import nodemailer from "nodemailer";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 
-const reserveStock = async (productId, quantity) => {
+const reserveStockForOrder = async (orderCart) => {
   try {
-    const stockRecord = await StockRecord.findOne({ productId });
-    const product = await Product.findById(productId);
+    // Extract product IDs
+    const productIds = orderCart.map((item) => item.productInfo.id);
 
-    if (!stockRecord) {
-      throw new Error("Stock record not found");
+    // Fetch all stock records and products in one batch
+    const [stockRecords, products] = await Promise.all([
+      StockRecord.find({ productId: { $in: productIds } }),
+      Product.find({ _id: { $in: productIds } }),
+    ]);
+
+    // Create maps for quick lookup
+    const stockMap = new Map(
+      stockRecords.map((r) => [r.productId.toString(), r])
+    );
+    const productMap = new Map(products.map((p) => [p._id.toString(), p]));
+
+    const results = [];
+
+    for (const item of orderCart) {
+      const productId = item.productInfo.id;
+      const quantity = item.quantity;
+
+      const stockRecord = stockMap.get(productId);
+      const product = productMap.get(productId);
+
+      if (!stockRecord || !product) {
+        results.push({
+          success: false,
+          message: `Product or stock not found for productId: ${productId}`,
+        });
+        continue;
+      }
+
+      if (stockRecord.inStock < quantity) {
+        results.push({
+          success: false,
+          message: `Not enough stock for productId: ${productId}`,
+        });
+        continue;
+      }
+
+      // Update in-memory (will persist after bulk save)
+      stockRecord.inStock -= quantity;
+      stockRecord.reservedStock += quantity;
+      stockRecord.totalReserved = (stockRecord.totalReserved || 0) + quantity;
+
+      product.totalOrders = (product.totalOrders || 0) + 1;
+      product.totalReserved = (product.totalReserved || 0) + quantity;
+
+      results.push({
+        success: true,
+        message: "Stock reserved successfully",
+        stockRecord,
+        product,
+      });
     }
 
-    if (stockRecord.inStock < quantity) {
-      throw new Error("Not enough stock available");
-    }
+    // Save all updated stock and product documents in bulk
+    const savePromises = results.flatMap((r) => {
+      const ops = [];
+      if (r.stockRecord?.save) ops.push(r.stockRecord.save());
+      if (r.product?.save) ops.push(r.product.save());
+      return ops;
+    });
 
-  
-    stockRecord.inStock -= quantity;
-    stockRecord.reservedStock += quantity;
-    stockRecord.totalReserved += quantity;
+    await Promise.all(savePromises);
 
-    product.totalOrders += 1;
-    product.totalReserved += quantity;
-
-    await stockRecord.save();
-    await product.save();
-
-    return { success: true, message: "Stock reserved successfully" };
+    // Return success/failure results (excluding internal models)
+    return results.map(({ success, message }) => ({ success, message }));
   } catch (error) {
-    return { success: false, message: error.message };
+    console.error("reserveStockForOrder error:", error);
+    return orderCart.map(() => ({
+      success: false,
+      message: "Unexpected error during stock reservation",
+    }));
   }
 };
 
@@ -166,32 +215,47 @@ const notifyAdminForLowStock = async (productId) => {
 const checkAndAdjustStock = async (req, res) => {
   try {
     const cart = req.body;
+    const productIds = cart.map((item) => item.productInfo.id);
 
-    const updatedCart = [];
-    for (const item of cart) {
-      const {
-        productInfo: { id: productId },
-        quantity,
-      } = item;
-      const stockRecord = await StockRecord.findOne({ productId });
+    // Fetch all stock records in one query
+    const stockRecords = await StockRecord.find({
+      productId: { $in: productIds },
+    });
+
+    // Create a map for quick lookup
+    const stockMap = new Map(
+      stockRecords.map((record) => [record.productId.toString(), record])
+    );
+
+    const updatedCart = cart.map((item) => {
+      const productId = item.productInfo.id;
+      const stockRecord = stockMap.get(productId);
 
       if (!stockRecord) {
-        return res.status(404).json({
+        // Optionally: handle missing stock (keep original or remove)
+        return {
+          ...item,
           error: `Stock record not found for product ID: ${productId}`,
-        });
+        };
       }
 
-      if (stockRecord.inStock < quantity) {
-        item.quantity = stockRecord.inStock;
-      }
+      const adjustedQuantity =
+        stockRecord.inStock < item.quantity
+          ? stockRecord.inStock
+          : item.quantity;
 
-      updatedCart.push(item);
-    }
+      return {
+        ...item,
+        quantity: adjustedQuantity,
+      };
+    });
+
     res.status(200).json(updatedCart);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 const getStockRecordById = async (req, res) => {
   try {
@@ -210,7 +274,6 @@ const getStockRecordById = async (req, res) => {
 
 const releaseReservedStock = async (req, res) => {
   try {
-    // 1. Find expired orders with lean() for better performance
     const expiredOrders = await Order.find({
       paymentStatus: "pending",
       expiredAt: { $lt: new Date() },
@@ -264,7 +327,6 @@ const releaseReservedStock = async (req, res) => {
   }
 };
 export {
-  reserveStock,
   deductReservedStock,
   releaseReservedStock,
   moveReservedToInStock,
@@ -272,6 +334,7 @@ export {
   notifyAdminForLowStock,
   checkAndAdjustStock,
   getStockRecordById,
+  reserveStockForOrder,
 };
 
 // User places an order → reserveStock()

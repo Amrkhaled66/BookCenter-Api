@@ -1,7 +1,5 @@
 import Order from "../models/Order.js";
 
-import Order from "../models/Order.js";
-
 const formatOrders = async (orderHistory) => {
   try {
     const orderIds = orderHistory.map((order) => order.orderId.toString());
